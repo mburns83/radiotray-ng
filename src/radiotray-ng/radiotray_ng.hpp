@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <mutex>
 
 class IConfig;
 class IPlayer;
@@ -144,5 +145,6 @@ private:
 	std::vector<IBookmarks::station_data_t> current_group_stations;
 	int current_station_index;
 
+	std::once_flag play_url_setup;
 	const std::string play_url_group;
 };

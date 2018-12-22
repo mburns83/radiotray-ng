@@ -191,6 +191,7 @@ The editor supports all of the typical editor operations including adding, editi
 ```
 Available commands:
 
+    play_url 'url'
     get_bookmarks
     get_config
     get_player_state

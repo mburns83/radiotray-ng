@@ -518,6 +518,12 @@ void RadiotrayNG::play(const std::string& group, const std::string& station)
 				this->config->set_string(LAST_STATION_KEY, std.name);
 				this->config->set_bool(LAST_STATION_NOTIFICATION_KEY, std.notifications);
 			}
+			else
+			{
+				this->config->set_string(LAST_STATION_GROUP_KEY, "");
+				this->config->set_string(LAST_STATION_KEY, "");
+				this->config->set_bool(LAST_STATION_NOTIFICATION_KEY, true);
+			}
 
 			this->set_station(group, std.name, std.notifications);
 
@@ -639,6 +645,14 @@ void RadiotrayNG::display_volume_level()
 
 bool RadiotrayNG::reload_bookmarks()
 {
+	// hack... preserve play_url data across reloads...
+	std::vector<IBookmarks::station_data_t> play_url_group_data;
+
+	if (this->bookmarks->get_group_stations(this->play_url_group, play_url_group_data))
+	{
+		this->bookmarks->remove_group(this->play_url_group);
+	}
+
 	bool result = this->bookmarks->load();
 
 	if (result)
@@ -646,6 +660,13 @@ bool RadiotrayNG::reload_bookmarks()
 		// always show...
 		this->notification.notify("Bookmarks Reloaded", APP_NAME_DISPLAY,
 			radiotray_ng::word_expand(this->config->get_string(RADIOTRAY_NG_NOTIFICATION_KEY, DEFAULT_RADIOTRAY_NG_NOTIFICATION_VALUE)));
+
+		// *sigh* now add it back...
+		if (!play_url_group_data.empty())
+		{
+			this->bookmarks->add_group(this->play_url_group, "");
+			this->bookmarks->add_station(this->play_url_group, "", play_url_group_data[0].url, "", true);
+		}
 
 		// force reloading of current groups station list...
 		this->set_station(this->group, this->station, this->station_notifications);
@@ -655,6 +676,13 @@ bool RadiotrayNG::reload_bookmarks()
 		// always show...
 		this->notification.notify("Bookmarks Reload Failed", APP_NAME_DISPLAY,
 			radiotray_ng::word_expand(this->config->get_string(RADIOTRAY_NG_NOTIFICATION_KEY, DEFAULT_RADIOTRAY_NG_NOTIFICATION_VALUE)));
+
+		// *sigh* now add it back...
+		if (!play_url_group_data.empty())
+		{
+			this->bookmarks->add_group(this->play_url_group, "");
+			this->bookmarks->add_station(this->play_url_group, "", play_url_group_data[0].url, "", true);
+		}
 	}
 
 	return result;
