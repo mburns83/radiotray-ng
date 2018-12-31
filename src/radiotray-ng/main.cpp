@@ -248,6 +248,8 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	LOG(info) << RTNG_USER_AGENT;
+
 	auto config = std::make_shared<Config>(config_path + RTNG_CONFIG_FILE);
 
 	// load config or create a new one
